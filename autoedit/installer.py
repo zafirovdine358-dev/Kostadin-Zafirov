@@ -1,4 +1,5 @@
-"""Put a launcher in Resolve's Workspace > Scripts menu so the plan can be built from inside the app (Free edition)."""
+"""Put a launcher in Resolve's Workspace > Scripts menu so the plan can be built from inside the app (Free edition up
+to 21.0; from 21.1 the Free edition's Scripts menu only runs Lua, and Python needs Studio)."""
 import os
 import sys
 
@@ -29,4 +30,6 @@ def install_resolve_script(cfg: dict, folder: str | None = None) -> str:
     path = os.path.join(folder, "BASED Auto Edit.py")
     with open(path, "w") as f:
         f.write(LAUNCHER.format(repo=repo, config=cfg.get("_path", "")))
-    return f"installed {path}\nIn Resolve: Workspace > Scripts > BASED Auto Edit"
+    return (f"installed {path}\nIn Resolve: Workspace > Scripts > BASED Auto Edit\n"
+            "If the entry is not listed (Resolve Free 21.1 or newer runs only Lua scripts there), use Resolve "
+            "Studio, or `autoedit apply --no-resolve` and import the EDL and SRT files by hand.")

@@ -78,8 +78,27 @@ def _write_report(plan: EditPlan, path: str) -> None:
     print("report:", md)
 
 
-def cmd_apply(args, cfg):
+def _build(plan, path, cfg, shorts, layout):
+    """Build the timelines in Resolve. When Resolve cannot be reached (not running, no scripting in this edition),
+    write the EDL + SRT files instead and exit with 3."""
     from . import export, resolve_api
+    try:
+        res = resolve_api.apply(plan, cfg, shorts=shorts, layout=layout)
+    except resolve_api.ResolveUnavailable as e:
+        print(f"Could not build in Resolve: {e}")
+        for p in export.write_all(plan, os.path.dirname(path), shorts):
+            print("wrote", p)
+        print("Import each .edl with File > Import > Timeline and each .srt with File > Import > Subtitle "
+              "(cuts and captions only: no framing, overlays or cleaned audio).")
+        sys.exit(3)
+    plan.save(path)
+    _write_report(plan, path)
+    if res["issues"]:
+        sys.exit(2)
+
+
+def cmd_apply(args, cfg):
+    from . import export
     plan, path = _load(args, cfg)
     shorts = args.shorts.split(",") if args.shorts else None
     out = os.path.dirname(path)
@@ -87,11 +106,7 @@ def cmd_apply(args, cfg):
         for p in export.write_all(plan, out, shorts):
             print("wrote", p)
     if not args.no_resolve:
-        res = resolve_api.apply(plan, cfg, shorts=shorts, layout=args.layout or cfg["timeline"]["layout"])
-        plan.save(path)
-        _write_report(plan, path)
-        if res["issues"]:
-            sys.exit(2)
+        _build(plan, path, cfg, shorts, args.layout or cfg["timeline"]["layout"])
 
 
 def cmd_status(args, cfg):
@@ -120,14 +135,10 @@ def cmd_run(args, cfg):
     print(report.table(plan))
     _write_report(plan, path)
     if not args.dry_run:
-        from . import resolve_api
-        res = resolve_api.apply(plan, cfg, shorts=shorts, layout=cfg["timeline"]["layout"])
-        plan.save(path)
-        _write_report(plan, path)
-        if res["issues"]:
-            sys.exit(2)
+        _build(plan, path, cfg, shorts, cfg["timeline"]["layout"])
     else:
-        print("plan only: build it in Resolve with `autoedit apply` (or Workspace > Scripts > BASED Auto Edit)")
+        print("plan only: build it in Resolve with `autoedit apply` (Resolve Studio), or `autoedit apply --no-resolve` "
+              "for EDL + SRT files that any edition can import")
 
 
 def cmd_doctor(args, cfg):

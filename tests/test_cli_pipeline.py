@@ -122,3 +122,27 @@ def test_stages_can_be_run_one_by_one_like_the_skills(studio, capsys):
     assert g.overlays == [] and g.subtitles == "" and g.voice == "" and "fine" not in g.snaps
     assert not {"captions", "products", "music", "stamp", "audio", "fine", "turns"} & set(g.stats)   # nothing stale
     assert g.tl_duration() >= first
+
+
+def test_without_a_reachable_resolve_apply_and_run_leave_the_edl_and_srt(studio, monkeypatch, capsys):
+    cfg_path, slug, tmp = studio
+
+    def unreachable():
+        raise resolve_api.ResolveUnavailable("Resolve is not running")
+
+    monkeypatch.setattr(resolve_api, "connect", unreachable)
+    cli.main(["--config", cfg_path, "run", "--dry-run"])
+    capsys.readouterr()
+    with pytest.raises(SystemExit) as ex:
+        cli.main(["--config", cfg_path, "apply"])
+    assert ex.value.code == 3
+    assert os.path.isfile(os.path.join(slug, "G1291.edl")) and os.path.isfile(os.path.join(slug, "G1291.srt"))
+    out = capsys.readouterr().out
+    assert "Could not build in Resolve: Resolve is not running" in out and "File > Import > Timeline" in out
+
+    # `run` without --dry-run ends the same way, after saving the plan
+    with pytest.raises(SystemExit) as ex:
+        cli.main(["--config", cfg_path, "run", "--shorts", "G1292"])
+    assert ex.value.code == 3
+    assert [s.name for s in EditPlan.load(os.path.join(slug, "edit.json")).shorts] == ["G1292"]
+    assert os.path.isfile(os.path.join(slug, "G1292.edl"))

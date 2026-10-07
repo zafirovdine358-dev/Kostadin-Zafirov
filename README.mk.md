@@ -11,17 +11,63 @@
 > Whisper, лицата и Claude делот се тестирани со замени, зашто тие модели и клучеви ги нема таму каде што е напишано.
 > Прв пат пушти на пробен проект.
 
-## Инсталација
+## Прв обид, чекор по чекор
+
+**1. Програми.** Ти требаат Python 3.12 и ffmpeg.
+
+- Mac (со [Homebrew](https://brew.sh)): `brew install python@3.12 ffmpeg`
+- Windows: `winget install Python.Python.3.12` и `winget install Gyan.FFmpeg`, па затвори го терминалот и отвори го пак.
+
+**2. Кодот.** На GitHub отвори го репото `zafirovdine358-dev/Kostadin-Zafirov`, префрли се на гранката
+`claude/laughing-goodall-adi4f8`, па *Code > Download ZIP* и отпакувај. Отвори терминал (Mac: Terminal, Windows:
+Command Prompt) и влези во отпакуваната папка: напиши `cd ` и повлечи ја папката во прозорецот.
+
+**3. Инсталација** (само еднаш):
 
 ```
-pip install -e ".[all]"
-autoedit doctor        # што има, што недостасува и што следно
-autoedit init --based-root "~/Documents/CLIENT WORK/BASED" --work "~/Documents/BASED Auto Edit"
+python3 -m venv .venv                  # Windows: py -m venv .venv
+source .venv/bin/activate              # Windows: .venv\Scripts\activate
+pip install -e ".[asr,faces,images]"
 ```
 
-Треба `ffmpeg` и Python 3.10+. Сè друго е по избор (види табела во [README.md](README.md)): без Whisper нема
-титлови и фин рез, без модел за лица нема камера-агли, без `pillow` нема производи, без `mediapipe` нема „производи зад
-личноста“.
+Во секој нов терминал пушти ја втората линија пак. За „производи зад личноста“ подоцна додај `mediapipe`:
+`pip install -e ".[matte]"`.
+
+**4. Проверка.** `autoedit doctor` печати PASS, WARN или FAIL за секоја работа. FAIL мора да се поправи; WARN значи
+дека некоја функција нема да работи (на пр. без Whisper нема титлови и фин рез, без модел за лица нема камера-агли).
+
+**5. Поставки** (еднаш, од истата папка):
+
+```
+autoedit init --based-root "~/Documents/CLIENT WORK/BASED" --work "~/Documents/BASED Auto Edit" --yunet "/патека/до/face_detection_yunet_2023mar.onnx"
+```
+
+Ова го пишува `autoedit.json` во тековната папка, па понатаму командите пушти ги од таа папка.
+
+**6. Пробај на една снимка, без Resolve:**
+
+```
+autoedit run --dry-run --folder "/патека/до/29-09-26 Lian" --shorts G1291
+```
+
+`--folder` е папката со снимките од еден ден (повлечи ја во терминалот за да се залепи патеката), а `--shorts` е
+името на еден клип без наставката (`G1291` за `G1291.MP4`). Оригиналите само се читаат: сè што се создава оди во
+работната папка. Првпат Whisper се симнува сам (треба интернет). На крај се печати табела и патека до `report.md`:
+отвори го и види што е сечено и што треба да провериш.
+
+**7. Во Resolve Studio.** Направи нов празен проект за проба. *DaVinci Resolve > Preferences > System > General >
+External scripting using: Local*, Save (ако не се поврзе, рестартирај го Resolve). Потоа во терминалот:
+`autoedit apply`. Во *Media Pool* се појавува папка `BATCH 1`, а во *Timelines* линија `BATCH 1 - G1291`. Погледни
+еден кадар: главата на говорникот треба да е на средина, со очите на околу 30% од врвот. Pan/Tilt/Zoom е делот што
+најмногу бара проверка.
+
+**Без Studio:** `autoedit apply --no-resolve` ги пишува `G1291.edl` и `G1291.srt` во работната папка. Во Resolve:
+*File > Import > Timeline* (EDL) и *File > Import > Subtitle* (SRT). Добиваш само резови и титлови, без кадрирање,
+анимации и исчистен глас. Од Resolve 21.1 Python скриптирањето е само за Studio, па Free не може да ги изгради
+временските линии сам. Кое издание имаш: *DaVinci Resolve > About DaVinci Resolve*.
+
+Сè друго е по избор (види табела во [README.md](README.md)): без `pillow` нема производи, без `mediapipe` нема „производи
+зад личноста“.
 
 ## Користење
 
@@ -36,8 +82,12 @@ autoedit apply --no-resolve   # само EDL + SRT датотеки (за рач
 `products-behind`, `broll --product "curl cream"`, `stamps-and-music --stamp WM-XXXX.png`, `audio-fix`.
 Ако пуштиш чекор повторно, сè што доаѓа по него се ресетира.
 
-**Resolve Studio:** *Preferences > General > External scripting using: Local*, па `autoedit apply`.
-**Resolve Free:** еднаш `autoedit install-resolve-script`, па во Resolve *Workspace > Scripts > BASED Auto Edit*.
+- **Resolve Studio:** *Preferences > System > General > External scripting using: Local*, па `autoedit apply`.
+- **Resolve Free до 21.0:** еднаш `autoedit install-resolve-script`, па во Resolve *Workspace > Scripts > BASED Auto
+  Edit*.
+- **Resolve Free 21.1 и понов:** `autoedit apply --no-resolve` и рачен увоз на EDL и SRT.
+
+Ако Resolve не може да се достигне, `apply` сам ги запишува тие две датотеки и завршува со код 3.
 
 Штембилот го симнуваш сам од Editor Portal (9:16 PNG). Алатката никогаш не го отвора порталот и не бара, не чува и не
 запишува линк до него.

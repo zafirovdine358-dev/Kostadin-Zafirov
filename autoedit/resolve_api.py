@@ -1,8 +1,9 @@
 """DaVinci Resolve scripting API: connect, then build timelines from an edit plan.
 
-Standard library only, so it runs from a terminal against Resolve Studio and from Workspace > Scripts in the Free
-edition. It needs Resolve 18.5+ (AppendToTimeline with trackIndex/recordFrame). After building, every timeline is read
-back and compared with the plan, because the API's frame conventions are easy to get wrong: look at the issues list.
+Standard library only, so it runs from a terminal against Resolve Studio and from Workspace > Scripts. Python scripting
+is a Studio feature from Resolve 21.1 on; the Free edition could run it from Workspace > Scripts up to 21.0. It needs
+Resolve 18.5+ (AppendToTimeline with trackIndex/recordFrame). After building, every timeline is read back and compared
+with the plan, because the API's frame conventions are easy to get wrong: look at the issues list.
 """
 import builtins
 import os
@@ -37,7 +38,7 @@ def _defaults() -> tuple[str, str]:
 
 def connect():
     """The Resolve app object. Inside Resolve a global `resolve` already exists; outside, Resolve Studio must be
-    running with Preferences > General > External scripting using: Local."""
+    running with Preferences > System > General > External scripting using: Local."""
     for holder in (builtins, sys.modules.get("__main__")):
         app = getattr(holder, "resolve", None)
         if app is not None:
@@ -53,12 +54,13 @@ def connect():
     except ImportError as e:
         raise ResolveUnavailable(
             "Cannot import DaVinciResolveScript. Install DaVinci Resolve and set RESOLVE_SCRIPT_API "
-            f"(looked in {mods}). The Free edition can only run scripts from Workspace > Scripts "
-            "(autoedit install-resolve-script).") from e
+            f"(looked in {mods}). Scripting from a terminal needs Resolve Studio; the Free edition can only run "
+            "scripts from Workspace > Scripts, and only Lua ones from 21.1 on (autoedit install-resolve-script, "
+            "or autoedit apply --no-resolve).") from e
     app = dvr.scriptapp("Resolve")
     if app is None:
-        raise ResolveUnavailable("Resolve is not running, or Preferences > General > External scripting using "
-                                 "is not set to Local (Studio only).")
+        raise ResolveUnavailable("Resolve is not running, or Preferences > System > General > External scripting "
+                                 "using is not set to Local (Studio only).")
     return app
 
 

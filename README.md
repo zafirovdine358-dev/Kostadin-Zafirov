@@ -74,9 +74,16 @@ autoedit apply                               # build the timelines in Resolve
 autoedit apply --no-resolve                  # only write G1291.edl / G1291.srt (import by hand)
 ```
 
-`apply` needs Resolve Studio running with *Preferences > General > External scripting using: Local*. On the **Free**
-edition run `autoedit install-resolve-script` once, then use *Workspace > Scripts > BASED Auto Edit* inside Resolve: it
-builds the newest plan from there (that script needs nothing but the standard library).
+`apply` needs **Resolve Studio** running with *DaVinci Resolve > Preferences > System > General > External scripting
+using: Local*. Resolve 21.1 moved Python scripting to Studio, so on the **Free** edition:
+
+- up to 21.0: run `autoedit install-resolve-script` once, then use *Workspace > Scripts > BASED Auto Edit* inside
+  Resolve; it builds the newest plan from there (that script needs nothing but the standard library);
+- 21.1 and newer: the Scripts menu only runs Lua. Use `autoedit apply --no-resolve` and import the `.edl` (*File >
+  Import > Timeline*) and the `.srt` (*File > Import > Subtitle*) by hand: cuts and captions only, none of the framing,
+  overlays or cleaned audio.
+
+When Resolve cannot be reached, `apply` and `run` write those two files themselves and exit with code 3.
 
 Your footage layout is the plugin's: `BASED/IRL/FOOTAGE/New Vids/<DD-MM-YY Host>/`, `BASED/IRL/ASSETS/{Music,BASED
 Products,Stamps,B-roll}`. Change any of it under `paths` in `autoedit.json`. The stamp comes from the Editor Portal:

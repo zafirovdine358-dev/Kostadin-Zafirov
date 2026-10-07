@@ -18,8 +18,10 @@ Speak plainly to the editor: no file paths or tool names unless they ask.
 2. If there is no `autoedit.json`, `autoedit init --based-root "<their BASED folder>" --work "<scratch folder>"` and
    set `models.whisper`, `models.yunet`, `models.sface` to local files if they have them. Never download models
    without asking.
-3. Resolve Studio: needs *External scripting using: Local*. Free edition: `autoedit install-resolve-script`, then they
-   run *Workspace > Scripts > BASED Auto Edit* themselves.
+3. Resolve Studio: needs *Preferences > System > General > External scripting using: Local*. Free edition up to 21.0:
+   `autoedit install-resolve-script`, then they run *Workspace > Scripts > BASED Auto Edit* themselves. Free 21.1 and
+   newer cannot run Python scripts: use `autoedit apply --no-resolve` and have them import the EDL and SRT by hand
+   (cuts and captions only; say so).
 
 ## The order of work (what to type)
 
