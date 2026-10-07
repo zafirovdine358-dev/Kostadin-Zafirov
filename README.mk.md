@@ -39,10 +39,16 @@ pip install -e ".[asr,faces,images]"
 **5. Поставки** (еднаш, од истата папка):
 
 ```
-autoedit init --based-root "~/Documents/CLIENT WORK/BASED" --work "~/Documents/BASED Auto Edit" --yunet "/патека/до/face_detection_yunet_2023mar.onnx"
+autoedit init --based-root "~/Documents/CLIENT WORK/BASED" --work "~/Documents/BASED Auto Edit"
 ```
 
 Ова го пишува `autoedit.json` во тековната папка, па понатаму командите пушти ги од таа папка.
+
+**Моделите.** Ако си го правел поставувањето за Premiere, тие веќе се во `~/Documents/Claude Tools` (`whisper-base/`,
+`models/face_detection_yunet_2023mar.onnx`, `models/face_recognition_sface_2021dec.onnx`): `init` ги наоѓа сам и
+печати `found whisper: ...`. Инаку додај `--whisper`, `--yunet` и `--sface` со патеките. Папката за Whisper мора да ги
+има сите четири датотеки: `model.bin` (големата, околу 150 MB), `config.json`, `tokenizer.json` и `vocabulary.txt`.
+`autoedit doctor` кажува која недостасува.
 
 **6. Пробај на една снимка, без Resolve:**
 

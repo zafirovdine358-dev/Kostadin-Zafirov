@@ -51,8 +51,11 @@ You need `ffmpeg`/`ffprobe` on the PATH and Python 3.10+. Everything is optional
 | + `mediapipe` | products behind the person |
 | + `anthropic` and an API key (or `ant auth login`) | `--llm` fine cut, `--showing claude` |
 
-Models are not downloaded for you: set `models.whisper` (a name or a local faster-whisper folder), `models.yunet`
-and `models.sface` in `autoedit.json`:
+Models are not downloaded for you (faster-whisper itself fetches Whisper's `base` on first use). If the BASED Premiere
+setup already put them in `~/Documents/Claude Tools` (`whisper-base/`, `models/face_detection_yunet_2023mar.onnx`,
+`models/face_recognition_sface_2021dec.onnx`), `autoedit init` finds them and writes them into `autoedit.json`.
+Otherwise set `models.whisper` (a name, or a local faster-whisper folder holding `model.bin`, `config.json`,
+`tokenizer.json` and `vocabulary.txt`), `models.yunet` and `models.sface` yourself:
 
 ```json
 {"models": {"whisper": "base",
@@ -60,7 +63,9 @@ and `models.sface` in `autoedit.json`:
             "sface": "~/Documents/Claude Tools/models/face_recognition_sface_2021dec.onnx"}}
 ```
 
-`autoedit doctor` shows PASS for each one it finds. YuNet finds the faces (camera angles); SFace is only needed to
+`autoedit doctor` shows PASS for each one it finds, names the files a Whisper folder is missing, and adds
+"(English only)" when the folder holds one of Whisper's `.en` models (right for English interviews, wrong for any other
+language). YuNet finds the faces (camera angles); SFace is only needed to
 recognise the host across shorts: without it the host is the face whose mouth moves when the host's voice is on.
 To check the YuNet file on your machine: `AUTOEDIT_YUNET=/path/to/face_detection_yunet_2023mar.onnx pytest tests/test_real_yunet.py`
 (it frames a real face photo and checks the face lands between the guides).
