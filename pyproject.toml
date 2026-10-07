@@ -17,7 +17,7 @@ images = ["pillow"]                          # product overlays, stamps, BASED g
 matte = ["mediapipe", "opencv-python-headless", "pillow"]
 claude = ["anthropic"]                       # optional Claude transcript and vision passes
 all = ["faster-whisper", "opencv-python-headless", "pillow", "mediapipe", "anthropic"]
-test = ["pytest"]
+test = ["pytest", "scikit-image"]
 
 [project.scripts]
 autoedit = "autoedit.cli:main"

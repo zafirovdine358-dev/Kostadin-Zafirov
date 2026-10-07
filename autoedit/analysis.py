@@ -10,6 +10,7 @@ from .plan import Short
 
 SR = 16000
 _MODELS: dict = {}
+_DOWN: list[str] = []     # why Whisper could not load, so the next stage does not retry the download
 
 
 @dataclass
@@ -130,13 +131,18 @@ def load(short: Short, cfg: dict, log=print, need_text: bool = False) -> Analysi
                 raise SystemExit("this stage needs word timings: pip install faster-whisper")
             return an
     words = None
-    if have_whisper():
+    if have_whisper() and _DOWN:
+        if need_text:
+            raise SystemExit(f"Whisper failed: {_DOWN[0]}\nSet models.whisper to a local faster-whisper folder.")
+        log(f"  {short.name}: Whisper unavailable, using energy-only speech detection")
+    elif have_whisper():
         log(f"  {short.name}: transcribing (two Whisper passes)")
         try:
             a = whisper_words(x, cfg, vad=True)
             b = whisper_words(x, cfg, vad=False) if cfg["asr"]["second_pass"] else []
             words = merge_passes(a, b, e, cfg["asr"]["pass2_min_prob"])
         except Exception as ex:      # no model on this machine, no network, ...
+            _DOWN.append(f"{type(ex).__name__}: {ex}")
             if need_text:
                 raise SystemExit(f"Whisper failed: {ex}\nSet models.whisper to a local faster-whisper folder.") from ex
             log(f"  {short.name}: Whisper unavailable ({type(ex).__name__}), using energy-only speech detection")

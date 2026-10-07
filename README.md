@@ -52,7 +52,18 @@ You need `ffmpeg`/`ffprobe` on the PATH and Python 3.10+. Everything is optional
 | + `anthropic` and an API key (or `ant auth login`) | `--llm` fine cut, `--showing claude` |
 
 Models are not downloaded for you: set `models.whisper` (a name or a local faster-whisper folder), `models.yunet`
-and `models.sface` in `autoedit.json`.
+and `models.sface` in `autoedit.json`:
+
+```json
+{"models": {"whisper": "base",
+            "yunet": "~/Documents/Claude Tools/models/face_detection_yunet_2023mar.onnx",
+            "sface": "~/Documents/Claude Tools/models/face_recognition_sface_2021dec.onnx"}}
+```
+
+`autoedit doctor` shows PASS for each one it finds. YuNet finds the faces (camera angles); SFace is only needed to
+recognise the host across shorts: without it the host is the face whose mouth moves when the host's voice is on.
+To check the YuNet file on your machine: `AUTOEDIT_YUNET=/path/to/face_detection_yunet_2023mar.onnx pytest tests/test_real_yunet.py`
+(it frames a real face photo and checks the face lands between the guides).
 
 ## Use
 
