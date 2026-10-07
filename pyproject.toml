@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autoedit"
+version = "0.1.0"
+description = "BASED IRL editing pipeline for DaVinci Resolve: cuts, camera angles, captions, products, music, voice clean-up"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["numpy"]
+
+[project.optional-dependencies]
+asr = ["faster-whisper"]                     # word timings: captions, fine cut, products, B-roll
+faces = ["opencv-python-headless"]           # camera angles, products behind the person
+images = ["pillow"]                          # product overlays, stamps, BASED graphic
+matte = ["mediapipe", "opencv-python-headless", "pillow"]
+claude = ["anthropic"]                       # optional Claude transcript and vision passes
+all = ["faster-whisper", "opencv-python-headless", "pillow", "mediapipe", "anthropic"]
+test = ["pytest"]
+
+[project.scripts]
+autoedit = "autoedit.cli:main"
+
+[tool.setuptools]
+packages = ["autoedit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

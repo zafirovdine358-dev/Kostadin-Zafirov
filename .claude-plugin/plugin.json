@@ -1,0 +1,6 @@
+{
+  "name": "based-resolve-editing",
+  "version": "0.1.0",
+  "description": "Edit BASED IRL street-interview shorts in DaVinci Resolve with the autoedit tool: ingest, rough cut, camera angles, fine cut, subtitles, products, B-roll, stamps and music, audio fix.",
+  "keywords": ["davinci-resolve", "video-editing", "based", "shorts"]
+}
