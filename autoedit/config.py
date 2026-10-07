@@ -120,6 +120,24 @@ def save(cfg: dict, path: str) -> str:
     return path
 
 
+TOOLS_FOLDERS = ["~/Documents/Claude Tools"]       # where the BASED Premiere setup keeps its local models
+KNOWN_MODELS = {"whisper": "whisper-base",           # a faster-whisper folder (model.bin, config.json, ...)
+                "yunet": "models/face_detection_yunet_2023mar.onnx",
+                "sface": "models/face_recognition_sface_2021dec.onnx"}
+
+
+def find_models() -> dict[str, str]:
+    """The models already on this computer in the BASED setup's Claude Tools folder, as {setting: path}."""
+    found = {}
+    for key, rel in KNOWN_MODELS.items():
+        for root in TOOLS_FOLDERS:
+            p = os.path.join(os.path.expanduser(root), *rel.split("/"))
+            if os.path.isfile(os.path.join(p, "model.bin") if key == "whisper" else p):
+                found[key] = p
+                break
+    return found
+
+
 def path(cfg: dict, key: str) -> str:
     """Resolve a configured folder: absolute as given, otherwise under based_root."""
     p = os.path.expanduser(cfg["paths"][key])

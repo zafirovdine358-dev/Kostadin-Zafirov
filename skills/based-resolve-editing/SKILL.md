@@ -15,9 +15,10 @@ Speak plainly to the editor: no file paths or tool names unless they ask.
 
 1. `autoedit doctor`. Fix what it marks FAIL (ffmpeg, Python). Tell the editor which WARNs cost them features
    (no Whisper = no captions or fine cut; no face model = no camera angles; no `pillow` = no product overlays).
-2. If there is no `autoedit.json`, `autoedit init --based-root "<their BASED folder>" --work "<scratch folder>"` and
-   set `models.whisper`, `models.yunet`, `models.sface` to local files if they have them. Never download models
-   without asking.
+2. If there is no `autoedit.json`, `autoedit init --based-root "<their BASED folder>" --work "<scratch folder>"`. It
+   picks up the models the Premiere setup left in `~/Documents/Claude Tools` (`whisper-base/`, `models/*.onnx`); for
+   others set `models.whisper`, `models.yunet`, `models.sface` to local files. A Whisper folder needs all four files
+   (`model.bin`, `config.json`, `tokenizer.json`, `vocabulary.txt`). Never download models without asking.
 3. Resolve Studio: needs *Preferences > System > General > External scripting using: Local*. Free edition up to 21.0:
    `autoedit install-resolve-script`, then they run *Workspace > Scripts > BASED Auto Edit* themselves. Free 21.1 and
    newer cannot run Python scripts: use `autoedit apply --no-resolve` and have them import the EDL and SRT by hand

@@ -1,6 +1,7 @@
 """Machine check (port of based-setup): what is installed, what is missing, what to do next."""
 import importlib
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -29,6 +30,31 @@ def _mod(name: str) -> str | None:
         return getattr(m, "__version__", "ok")
     except Exception:
         return None
+
+
+def _english_only(folder: str) -> bool:
+    """Whisper's English-only models have <|endoftext|> at id 50256 (the multilingual ones at 50257)."""
+    try:
+        with open(os.path.join(folder, "tokenizer.json"), encoding="utf-8") as f:
+            m = re.search(r'"id":\s*(\d+),\s*"content":\s*"<\|endoftext\|>"', f.read(4096))
+    except OSError:
+        return False
+    return bool(m) and int(m.group(1)) == 50256
+
+
+def _whisper_row(setting: str, found: str | None) -> tuple[str, str, str]:
+    w = os.path.expanduser(setting)
+    if not os.path.isdir(w):
+        hint = (f" Found {found}: run `autoedit init`, or set models.whisper to it." if found else
+                " For offline machines set models.whisper to a faster-whisper folder.")
+        return WARN, "whisper model", f"'{setting}' is downloaded on first use.{hint}"
+    missing = [n for n in ("model.bin", "config.json", "tokenizer.json") if not os.path.isfile(os.path.join(w, n))]
+    if not any(os.path.isfile(os.path.join(w, v)) for v in ("vocabulary.txt", "vocabulary.json")):
+        missing.append("vocabulary.txt")
+    if missing:
+        big = " (model.bin is the big file, about 150 MB: copy the whole folder)" if "model.bin" in missing else ""
+        return FAIL, "whisper model", f"{w} is missing {', '.join(missing)}{big}"
+    return PASS, "whisper model", w + (" (English only)" if _english_only(w) else "")
 
 
 def _ffmpeg_checks() -> list[tuple[str, str, str]]:
@@ -62,17 +88,15 @@ def run(cfg: dict) -> int:
         ver = _mod(mod)
         rows.append((PASS if ver else need, f"python: {mod}", f"{ver}" if ver else f"not installed ({why})"))
     models = cfg["models"]
-    w = os.path.expanduser(models["whisper"])
-    if os.path.isdir(w):
-        ok = os.path.isfile(os.path.join(w, "model.bin"))
-        rows.append((PASS if ok else FAIL, "whisper model", w if ok else f"{w} has no model.bin"))
-    else:
-        rows.append((WARN, "whisper model", f"'{models['whisper']}' is downloaded on first use; for offline "
-                     "machines set models.whisper to a faster-whisper folder"))
+    found = config.find_models()
+    rows.append(_whisper_row(models["whisper"], found.get("whisper")))
     for key, label in (("yunet", "YuNet face detector"), ("sface", "SFace face recognizer (host matching)")):
         p = os.path.expanduser(models[key])
-        rows.append((PASS if p and os.path.isfile(p) else WARN, label,
-                     p if p and os.path.isfile(p) else f"set models.{key} to the .onnx file"))
+        if p and os.path.isfile(p):
+            rows.append((PASS, label, p))
+        else:
+            hint = f" (found {found[key]}: run `autoedit init`)" if key in found else ""
+            rows.append((WARN, label, f"set models.{key} to the .onnx file{hint}"))
     for key in ("based_root", "work"):
         p = os.path.expanduser(cfg["paths"][key])
         if key == "work":

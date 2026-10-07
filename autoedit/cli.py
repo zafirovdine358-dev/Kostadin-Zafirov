@@ -154,6 +154,11 @@ def cmd_init(args, cfg):
     for k in ("whisper", "yunet", "sface"):
         if getattr(args, k, None):
             cfg["models"][k] = getattr(args, k)
+    for k, p in config.find_models().items():        # models the Premiere setup already put on this computer
+        unset = cfg["models"].get(k) in (("", "base") if k == "whisper" else ("",))
+        if unset and not getattr(args, k, None):
+            cfg["models"][k] = p
+            print(f"found {k}: {p}")
     print("wrote", config.save(cfg, args.out))
 
 
