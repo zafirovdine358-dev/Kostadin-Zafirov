@@ -25,7 +25,7 @@ Command Prompt) и влези во отпакуваната папка: напи
 **3. Инсталација** (само еднаш):
 
 ```
-python3 -m venv .venv                  # Windows: py -m venv .venv
+python3.12 -m venv .venv               # Windows: py -3.12 -m venv .venv
 source .venv/bin/activate              # Windows: .venv\Scripts\activate
 pip install -e ".[asr,faces,images]"
 ```
